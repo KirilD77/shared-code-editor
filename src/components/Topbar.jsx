@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './../styles/topbar.module.css';
 
 const Topbar = () => {
   const generateRandomString = () => Math.random().toString(36).slice(2);
+  const [url, setUrl] = useState("");
   return (
     <div className={styles.container}>
       <div className={styles.topbar}>
@@ -26,7 +27,7 @@ const Topbar = () => {
               </Link>
             </li>
             <li className={styles.menuItem}>
-              <Link to={`/editor/:${generateRandomString()}`} className={styles.menuLink}>
+              <Link to={`/editor/:${url}`} onClick={() => setTimeout(() => setUrl(generateRandomString()), 0)} className={styles.menuLink}>
                 Go to Editor
               </Link>
             </li>
