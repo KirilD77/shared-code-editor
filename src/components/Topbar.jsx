@@ -1,0 +1,40 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import styles from './../styles/topbar.module.css';
+
+const Topbar = () => {
+  const generateRandomString = () => Math.random().toString(36).slice(2);
+  return (
+    <div className={styles.container}>
+      <div className={styles.topbar}>
+        <div className={styles.logo}>CodeShare</div>
+        <nav className={styles.nav}>
+          <ul className={styles.menu}>
+            <li className={styles.menuItem}>
+              <Link to="/home" className={styles.menuLink}>
+                Home
+              </Link>
+            </li>
+            <li className={styles.menuItem}>
+              <Link to="/about" className={styles.menuLink}>
+                About This Site
+              </Link>
+            </li>
+            <li className={styles.menuItem}>
+              <Link to="/contact" className={styles.menuLink}>
+                Contact Us
+              </Link>
+            </li>
+            <li className={styles.menuItem}>
+              <Link to={`/editor/:${generateRandomString()}`} className={styles.menuLink}>
+                Go to Editor
+              </Link>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  );
+};
+
+export default Topbar;
