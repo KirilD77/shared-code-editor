@@ -1,3 +1,4 @@
+const codesAndRooms = {};
 const io = require('socket.io')(4000, {
   cors: {
     origin: '*'
@@ -7,6 +8,8 @@ const io = require('socket.io')(4000, {
 io.on('connection', (socket) => {
   socket.on('code', (code, room) => {
     console.log(code);
+    codesAndRooms[room] = code;
+    console.log(`code in object ${codesAndRooms[room]}`);
     if (room) {
       socket.to(room).emit('receiveCode', code);
     }
@@ -16,6 +19,13 @@ io.on('connection', (socket) => {
   socket.on('join-room', (room) => {
     console.log(`${socket.id} joined ${room}`);
     socket.join(room);
+
+    let code = codesAndRooms[room];
+    console.log();
+    if (code === undefined) {
+      code = '';
+    }
+    socket.emit('receiveCode', code);
   });
 
   socket.on('disconnect', () => {

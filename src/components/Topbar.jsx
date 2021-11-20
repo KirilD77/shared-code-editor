@@ -4,7 +4,7 @@ import styles from './../styles/topbar.module.css';
 
 const Topbar = () => {
   const generateRandomString = () => Math.random().toString(36).slice(2);
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState(generateRandomString());
   return (
     <div className={styles.container}>
       <div className={styles.topbar}>
@@ -12,7 +12,7 @@ const Topbar = () => {
         <nav className={styles.nav}>
           <ul className={styles.menu}>
             <li className={styles.menuItem}>
-              <Link to="/home" className={styles.menuLink}>
+              <Link to="/" className={styles.menuLink}>
                 Home
               </Link>
             </li>

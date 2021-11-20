@@ -1,0 +1,10 @@
+.container {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+}
+
+.codeEditors {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  background-color: hsla(225, 6%, 13%, 0.74);
+}
