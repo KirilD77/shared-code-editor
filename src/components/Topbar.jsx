@@ -36,16 +36,6 @@ const Topbar = () => {
               </Link>
             </li>
             <li className={styles.menuItem}>
-              <Link to="/about" className={styles.menuLink}>
-                About This Site
-              </Link>
-            </li>
-            <li className={styles.menuItem}>
-              <Link to="/contact" className={styles.menuLink}>
-                Contact Us
-              </Link>
-            </li>
-            <li className={styles.menuItem}>
               <Link
                 to={`/editor/:${url}`}
                 onClick={() =>

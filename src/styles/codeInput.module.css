@@ -1,0 +1,31 @@
+.editorContainer {
+  padding: 1rem;
+  border-radius: 10px;
+  flex: 1;
+}
+
+.editorContainer.collapsed {
+  flex: 0;
+}
+
+.eeditorContainer.collapsed .CodeMirror-scroll {
+  position: absolute;
+  overflow: hidden !important;
+}
+
+  
+.codeMirrorWrapper {
+  border-bottom-right-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.editorTitle {
+  display: flex;
+  justify-content: space-between;
+  background-color: hsl(225, 6%, 13%);
+  color: white;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  border-top-right-radius: 0.5rem;
+  border-top-left-radius: 0.5rem;
+}

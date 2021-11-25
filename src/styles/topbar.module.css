@@ -15,12 +15,15 @@
 
 .menu {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
 }
 
 .menuLink {
   color: black;
-  font-size: 2rem;
+  font-size: 1.6rem;
+
+  border: none;
+  background-color: white;
 
   outline: none;
   position: relative;
