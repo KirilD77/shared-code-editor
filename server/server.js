@@ -7,9 +7,12 @@ const io = require('socket.io')(4000, {
 
 io.on('connection', (socket) => {
   socket.on('code', (code, room) => {
-    console.log(code);
+    const codes = code.split("..");
+    console.log("html: ", codes[0]);
+    console.log("css: ", codes[1]);
+    console.log("js: ", codes[2]);
+
     codesAndRooms[room] = code;
-    console.log(`code in object ${codesAndRooms[room]}`);
     if (room) {
       socket.to(room).emit('receiveCode', code);
     }
@@ -21,7 +24,6 @@ io.on('connection', (socket) => {
     socket.join(room);
 
     let code = codesAndRooms[room];
-    console.log();
     if (code === undefined) {
       code = '';
     }

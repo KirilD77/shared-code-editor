@@ -1,156 +1,157 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import styles from './../styles/editor.module.css';
 import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import CodeInput from './CodeInput';
-import { useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import {
+  sendCodeToServer,
+  setIdOfRoom,
+  setIsConnectedToServer,
+  setLanguages,
+  setShouldEmitCode,
+  setSocket,
+  updateIframe
+} from '../redux/actionCreators';
+import { DEVIDER } from '../constants';
 
 const Editor = () => {
-  const { id } = useParams();
-  const DEVIDER = `[devider]-${id}`;
+  // i can do so because useSelector will not rerender component again and again because it will not rerender component if useSelector returns the same objects after dispatching an action
+  const dispatch = useDispatch();
+  dispatch(setIdOfRoom(useParams().id));
 
-  const { isLogged } = useSelector((state) => {
-    return {
-      isLogged: state.userAuth.isLogged
-    };
-  });
+  const { isLogged, languages, srcDoc, id } =
+    useSelector((state) => {
+      return {
+        isLogged: state.userAuth.isLogged,
+        connected: state.editor.isConnectedToServer,
+        languages: state.editor.languages,
+        srcDoc: state.editor.srcDoc,
+        shouldEmitCode: state.editor.shouldEmitCode,
+        id: state.editor.idOfRoom
+      };
+    }, shallowEqual);
+/*   console.log('connected: ', connected) */
 
-  const [connected, setConnected] = useState(false);
-  const [languages, setLanguages] = useState({
-    html: '',
-    css: '',
-    js: ''
-  });
-  const [srcDoc, setSrcDoc] = useState('');
-  const [shouldEmitCode, setShouldEmitCode] = useState(true);
+  const devider = DEVIDER;
 
-  // Get instance of socket, and connect to room with id of id from useParams and change if and only if id is changed
-  let socket = useMemo(() => {
+  // Get instance of socket, and connect to room with id of id from useParams and change if and only if id is changed and dispatch it to the store
+  let initSocket = useMemo(() => {
     const socket = io('http://localhost:4000');
     socket.on('connect', () => {
-      setConnected(true);
+      dispatch(setIsConnectedToServer(true));
       socket.emit('join-room', id);
     });
 
     socket.on('receiveCode', (code) => {
-      if (code === '') return;
-      const langs = code.split(DEVIDER);
-      setLanguages({
-        html: langs[0],
-        css: langs[1],
-        js: langs[2]
-      });
-      setShouldEmitCode(false);
+      const langs = code.split(devider);
+      if (code === '') {
+        return;
+      };
+      dispatch(
+        setLanguages({
+          html: langs[0],
+          css: langs[1],
+          js: langs[2]
+        })
+      );
+      dispatch(setShouldEmitCode(false));
     });
 
     return socket;
-  }, [id, DEVIDER]);
+  }, [id, devider, dispatch]);
+  dispatch(setSocket(initSocket));
 
   // In case of component unmounting close the socket connection
   useEffect(() => {
-    return () => socket.close();
-  }, [socket]);
+    return () => initSocket.close();
+  }, [initSocket]);
 
-  // here inputValue is emited to server to broadcast to every in room
+  // here code is emited to server to broadcast to everybody in room
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (
-        connected &&
-        // need to do so because when user is just connected he should not send his initial empty code to server to broadcast to everyone else.
-        shouldEmitCode &&
-        (languages.html !== '' || languages.css !== '' || languages.js !== '')
-      ) {
-        const code =
-          languages.html + DEVIDER + languages.css + DEVIDER + languages.js;
-        socket.emit('code', code, id);
-      }
-    }, 1000);
+    let shouldSendCodeToserver = true;
+    dispatch(sendCodeToServer(shouldSendCodeToserver));
     return () => {
-      clearTimeout(timeout);
+      shouldSendCodeToserver = false;
     };
-  }, [languages, id, socket, connected, shouldEmitCode, DEVIDER]);
+  }, [languages, dispatch]);
 
+  // logic for updating iframe, every time languages changed, execute callback in following useEffect
   useEffect(() => {
-    const timeOut = setTimeout(() => {
-      setSrcDoc(`
-      <html>
-        <body>${languages.html}</body>
-        <style>${languages.css}</style>
-        <script>${languages.js}</script>
-      </html>
-    `);
-    }, 250);
-
+    let shouldUpdateIframe = true;
+    dispatch(updateIframe(shouldUpdateIframe))
     return () => {
-      clearTimeout(timeOut);
+      shouldUpdateIframe = false;
     };
-  }, [languages]);
+  }, [languages, dispatch]);
 
   // Essentialy editor should consist at least of code inputs and iframe where that code is executed so i need a few(3)
   // code inputs and 1 iframe and i want also be able to rearange
   // positions of these elementss
-  return (
-    isLogged ?
-      <div className={styles.container}>
-        <div className={styles.codeEditors}>
-          <CodeInput
-            language="xml"
-            displayName="HTML"
-            value={languages.html}
-            onChange={(value) => {
-              setLanguages((oldLangs) => {
-                return {
-                  html: value,
-                  css: oldLangs.css,
-                  js: oldLangs.js
-                };
-              });
-            }}
-            shouldEmitCode={setShouldEmitCode}
-          />
-          <CodeInput
-            language="css"
-            displayName="CSS"
-            value={languages.css}
-            onChange={(value) => {
-              setLanguages((oldLangs) => {
-                return {
-                  html: oldLangs.html,
-                  css: value,
-                  js: oldLangs.js
-                };
-              });
-            }}
-            shouldEmitCode={setShouldEmitCode}
-          />
-          <CodeInput
-            language="javascript"
-            displayName="JS"
-            value={languages.js}
-            onChange={(value) => {
-              setLanguages((oldLangs) => {
-                return {
-                  html: oldLangs.html,
-                  css: oldLangs.css,
-                  js: value
-                };
-              });
-            }}
-            shouldEmitCode={setShouldEmitCode}
-          />
-        </div>
+  return isLogged ? (
+    <div className={styles.container}>
+      <div className={styles.codeEditors}>
+        <CodeInput
+          language="xml"
+          displayName="HTML"
+          value={languages.html}
+          onChange={(value) => {
+            dispatch(
+              setLanguages({
+                html: value,
+                css: languages.css,
+                js: languages.js
+              })
+            );
+          }}
+          shouldEmitCode={(value) => dispatch(setShouldEmitCode(value))}
+        />
+        <CodeInput
+          language="css"
+          displayName="CSS"
+          value={languages.css}
+          onChange={(value) => {
+            dispatch(
+              setLanguages({
+                html: languages.html,
+                css: value,
+                js: languages.js
+              })
+            );
+          }}
+          shouldEmitCode={(value) => dispatch(setShouldEmitCode(value))}
+        />
+        <CodeInput
+          language="javascript"
+          displayName="JS"
+          value={languages.js}
+          onChange={(value) => {
+            dispatch(
+              setLanguages({
+                html: languages.html,
+                css: languages.css,
+                js: value
+              })
+            );
+          }}
+          shouldEmitCode={(value) => dispatch(setShouldEmitCode(value))}
+        />
+      </div>
 
-        <div className={styles.iframe}>
-          <iframe
-            srcDoc={srcDoc}
-            title="output"
-            sandbox="allow-scripts"
-            frameBorder="2px"
-            width="100%"
-            height="100%"
-          />
-        </div>
-      </div> : "You are not loged in"
+      <div className={styles.iframe}>
+        <iframe
+          srcDoc={srcDoc}
+          title="output"
+          sandbox="allow-scripts"
+          frameBorder="2px"
+          width="100%"
+          height="100%"
+        />
+      </div>
+    </div>
+  ) : (
+    'You are not loged in'
   );
 };
 

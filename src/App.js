@@ -7,14 +7,13 @@ import { useDispatch } from 'react-redux';
 import { setIsLogged } from './redux/actionCreators';
 
 function App() {
-  console.log("app render");
+  console.log('app render');
   const { isLoading, isAuthenticated } = useAuth0();
   const dispatch = useDispatch();
-  
+
   // if information about user's auth status is loaded dispatch info about it
   if (isLoading === false) {
     dispatch(setIsLogged(isAuthenticated));
-    console.log(isAuthenticated);
   }
 
   // while isLoading show loader

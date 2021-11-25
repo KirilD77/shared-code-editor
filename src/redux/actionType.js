@@ -1,1 +1,7 @@
 export const SET_IS_LOGGED = 'SET_IS_LOGGED';
+export const SET_ID_OF_ROOM = 'SET_ID_OF_ROOM';
+export const SET_IS_CONNECTED_TO_SERVER = 'SET_IS_CONNECTED_TO_SERVER';
+export const SET_LANGUAGES = 'SET_LANGUAGES';
+export const SET_SRC_DOC = 'SET_SRC_DOC';
+export const SET_SHOULD_EMIT_CODE = 'SET_SHOULD_EMIT_CODE';
+export const SET_SOCKET = "SET_SOCKET";
